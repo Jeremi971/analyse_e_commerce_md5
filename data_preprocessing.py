@@ -11,6 +11,8 @@ dossier = "data"
 
 df_items = pd.read_csv(f"{dossier}/olist_order_items_dataset.csv")
 df_orders = pd.read_csv(f"{dossier}/olist_orders_dataset.csv")
+df_products = pd.read_csv(f"{dossier}/olist_products_dataset.csv")
+df_traduction_products = pd.read_csv(f'{dossier}/product_category_name_translation.csv')
 
 # Renommer les colonnes
 df_items = df_items.rename(columns={
@@ -34,6 +36,22 @@ df_orders = df_orders.rename(columns={
     'order_estimated_delivery_date': 'date_livraison_estimee_commande'
 })
 
+df_products = df_products.rename(columns={
+    'product_id': 'identifiant_produit',
+    'product_category_name': 'nom_categorie_produit',
+    'product_name_lenght': 'longueur_nom_produit',
+    'product_description_lenght': 'longueur_description_produit',
+    'product_photos_qty': 'quantite_photos_produit',
+    'product_weight_g': 'poids_produit_g',
+    'product_length_cm': 'longueur_produit_cm',
+    'product_height_cm': 'hauteur_produit_cm',
+    'product_width_cm': 'largeur_produit_cm'
+})
+
+df_traduction_products = df_traduction_products.rename(columns={
+    'product_category_name': 'nom_categorie_produit',
+    'product_category_name_english': 'nom_categorie_produit_anglais'
+})
 
 """
 Nettoyage des données
@@ -57,6 +75,18 @@ merged_data['date_livraison_client_commande'] = pd.to_datetime(merged_data['date
 merged_data['annee_livraison_client'] = merged_data['date_livraison_client_commande'].dt.year.fillna(0).astype(int)
 merged_data['mois_livraison_client'] = merged_data['date_livraison_client_commande'].dt.month.fillna(0).astype(int)
 merged_data['jour_livraison_client'] = merged_data['date_livraison_client_commande'].dt.day.fillna(0).astype(int)
+
+
+merged_2_data = pd.merge(df_products, df_items, on='identifiant_produit')
+df_merged = pd.merge(merged_2_data,df_traduction_products, on='nom_categorie_produit', how='left')
+df_merged.drop(columns=['nom_categorie_produit'], inplace=True)
+
+
+df_merged['chiffre_affaires'] = df_merged['quantite_photos_produit'] * df_merged['prix']
+
+# Calculer le chiffre d'affaires total
+ca_total = df_merged['chiffre_affaires'].sum()
+
 
 #Convertir les numéros de mois en nom de mois
 calendar.month_name = [
@@ -83,16 +113,18 @@ total_freight_per_customer = merged_data.groupby('identifiant_client')['valeur_f
 df_sorted_customers = pd.DataFrame({'identifiant_client': total_freight_per_customer.index,
                                     'valeur_fret': total_freight_per_customer.values})
 
-# Trier les clients par montant total des frais de livraison
-df_sorted_customers = df_sorted_customers.sort_values(by='valeur_fret', ascending=False)
+# # Trier les clients par montant total des frais de livraison
+# df_sorted_customers = df_sorted_customers.sort_values(by='valeur_fret', ascending=False)
 
 
 #Normalisation des données
 scaler = StandardScaler()
 X = scaler.fit_transform(df_sorted_customers[['valeur_fret']]) 
 
+
 # Clustering des clients en 20 segments
-kmeans = KMeans(n_clusters=3, random_state=42)
+num_clusters = 3
+kmeans = KMeans(n_clusters=num_clusters, random_state=42)
 df_sorted_customers['segment'] = kmeans.fit_predict(X)
 
 
@@ -111,3 +143,4 @@ df_sorted_customers= df_sorted_customers.dropna()
 #Jointure entre le dataframe df_sorted_customers et merged_data à partir de l'identifiant du client 
 df_sorted_customers = pd.merge(df_sorted_customers, merged_data[['identifiant_client', 'annee_livraison_client','mois_livraison_client','jour_livraison_client']], 
                                on='identifiant_client')
+
