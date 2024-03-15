@@ -1,5 +1,5 @@
 from dash import html
-from dash import dcc
+from dash import dcc 
 
 layout = html.Div([
     html.H1("Visualisation graphique sur le profil des clients"),
@@ -44,6 +44,8 @@ layout = html.Div([
             labelStyle={'display': 'inline-block'}
         ),
     ]),
+    
+    # Graphe 1 avec un padding-left de 20 pixels
     dcc.Graph(id='CA-graph'),
     dcc.Graph(id='segmentation-graph'),
     dcc.Graph(id='second-graph')
