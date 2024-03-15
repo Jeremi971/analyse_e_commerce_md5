@@ -14,6 +14,18 @@ def supprimer_les_doublons(liste_datas):
     for i, data in enumerate(liste_datas):
         liste_datas[i] = data.drop_duplicates(inplace=True)
 
+def joindre_deux_Dataframe(df1,df2):
+    """joindre deux Dataframe
+
+    Args:
+        df1 (Dataframe): df1
+        df2 (Dataframe): df2
+
+    Returns:
+        Dataframe: _description_
+    """
+    jointure = pd.merge(df1,df2,how='inner')
+    return jointure
 
 def calculer_les_indices_de_dispertions(data,target):
     """Calculer les indices de dispertions
