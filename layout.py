@@ -4,7 +4,7 @@ from dash import dcc
 layout = html.Div([
     html.H1("Visualisation graphique sur le profil des clients"),
     
-    # Case à cocher pour filtrer les années
+    # Case à cocher pour filtrer par mois
     html.Div([
         html.H3("Filtrer par année:"),
         dcc.Checklist(
@@ -17,11 +17,6 @@ layout = html.Div([
             value=[2016, 2017, 2018],  # Sélectionner toutes les années par défaut
             labelStyle={'display': 'inline-block'}
         ),
-    ]),
-    
-
-    # Case à cocher pour filtrer par mois
-    html.Div([
         html.H3("Filtrer par mois:"),
         dcc.Checklist(
             id='month-filter',
@@ -44,9 +39,8 @@ layout = html.Div([
             labelStyle={'display': 'inline-block'}
         ),
     ]),
-    
-    # Graphe 1 avec un padding-left de 20 pixels
     dcc.Graph(id='CA-graph'),
     dcc.Graph(id='segmentation-graph'),
-    dcc.Graph(id='second-graph')
+    dcc.Graph(id='second-graph'),
+    dcc.Graph(id='villes-graph')
 ])
